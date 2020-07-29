@@ -1,3 +1,3 @@
-module github.com/geek-go/getui
+module github.com/heyouzhi/getui
 
 go 1.14
