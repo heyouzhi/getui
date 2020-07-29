@@ -18,7 +18,7 @@ type SignResult struct {
 
 //获取Auth签名
 //http://docs.getui.com/getui/server/rest/other_if/
-func GetGeTuiToken(appID string, appKey string, masterSecret string) (string, error) {
+func GetGeTuiToken(appID string, appKey string, masterSecret string) (*SignResult, error) {
 
 	signStr, timestamp := Signature(appKey, masterSecret)
 
@@ -30,19 +30,19 @@ func GetGeTuiToken(appID string, appKey string, masterSecret string) (string, er
 
 	bodyByte, err := json.Marshal(param)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	url := API_URL + appID + "/auth_sign"
 	result, err := SendPost(url, "", bodyByte)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	tokenResult := new(SignResult)
 	if err := json.Unmarshal([]byte(result), &tokenResult); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tokenResult.AuthToken, nil
+	return tokenResult, nil
 }
