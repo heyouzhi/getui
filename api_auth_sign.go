@@ -2,6 +2,10 @@ package getui
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
+	"sync"
+	"time"
 )
 
 type SignParam struct {
@@ -45,4 +49,60 @@ func GetGeTuiToken(appID string, appKey string, masterSecret string) (*SignResul
 	}
 
 	return tokenResult, nil
+}
+
+var (
+	DefaultCacheToken = CacheToken{
+		caches:        make(map[cacheTokenKey]cacheTokenVal),
+		ExpireSeconds: 60 * 60,
+	}
+)
+
+type CacheToken struct {
+	sync.Mutex
+
+	ExpireSeconds int64
+	caches        map[cacheTokenKey]cacheTokenVal
+}
+type cacheTokenKey struct {
+	appid     string
+	appkey    string
+	masterSec string
+}
+type cacheTokenVal struct {
+	token      string
+	updateTime int64
+}
+
+func (ct *CacheToken) GetToken(appid, appkey, masterSecret string) (token string, err error) {
+	ct.Lock()
+	defer ct.Unlock()
+
+	key := cacheTokenKey{
+		appid:     appid,
+		appkey:    appkey,
+		masterSec: masterSecret,
+	}
+	now := time.Now()
+	cacheToken, ok := ct.caches[key]
+	if ok && now.Unix()-cacheToken.updateTime < ct.ExpireSeconds {
+		token = cacheToken.token
+		return
+	}
+	gtToken, err := GetGeTuiToken(appid, appkey, masterSecret)
+	if err != nil {
+		err = fmt.Errorf("get getui token:%v", err)
+		return
+	}
+	if strings.ToLower(gtToken.Result) != "ok" {
+		err = fmt.Errorf("getui result:%v", gtToken.Result)
+		return
+	}
+	cacheItem := cacheTokenVal{
+		token:      gtToken.AuthToken,
+		updateTime: now.Unix(),
+	}
+	ct.caches[key] = cacheItem
+	token = gtToken.AuthToken
+	return
 }

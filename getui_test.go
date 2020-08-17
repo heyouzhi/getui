@@ -179,7 +179,7 @@ func (g *GeTuiPush) SendByCid(cid string, payload *Payload) error {
 		RequestId:    time.Now().Format("20160102150405"),
 	}
 
-	res, err := PushSingle(g.Config.AppId, token, pushSingleParam)
+	res, err := PushSingle(g.Config.AppId, token.AuthToken, pushSingleParam)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (g *GeTuiPush) SendByCids(cids []string, payload *Payload) error {
 		PushInfo:     pushInfo, //必须
 	}
 
-	res, err := SaveListBody(g.Config.AppId, token, saveListBodyParam)
+	res, err := SaveListBody(g.Config.AppId, token.AuthToken, saveListBodyParam)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (g *GeTuiPush) SendByCids(cids []string, payload *Payload) error {
 		NeedDetail: true,
 	}
 
-	res2, err := PushList(g.Config.AppId, token, pushListParam)
+	res2, err := PushList(g.Config.AppId, token.AuthToken, pushListParam)
 	if err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func (g *GeTuiPush) SendAll(payload *Payload) error {
 		RequestId:    time.Now().Format("20160102150405"),
 	}
 
-	res, err := PushApp(g.Config.AppId, token, pushAppParam)
+	res, err := PushApp(g.Config.AppId, token.AuthToken, pushAppParam)
 	if err != nil {
 		return err
 	}
@@ -291,7 +291,7 @@ func (g *GeTuiPush) GetPushResult(taskidlist []string) (*PushResult, error) {
 		Taskidlist: taskidlist,
 	}
 
-	res, err := GetPushResult(g.Config.AppId, token, pushParam)
+	res, err := GetPushResult(g.Config.AppId, token.AuthToken, pushParam)
 	if err != nil {
 		return nil, err
 	}
